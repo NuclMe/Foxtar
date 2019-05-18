@@ -1,0 +1,95 @@
+@import "vars";
+
+.upload-product{
+	background-color: #f4f6f5;
+	padding-bottom: 100px;
+}
+
+.upload-product__inner{
+	border: 1px solid $border;
+	padding: 0 0 65px;
+	background-color: #fff;
+}
+.upload-product__title{
+	border-bottom: 1px solid $border;	
+	color: $fon;
+	font-size: 24px;
+	line-height: 60px;
+	font-weight: 500;
+	padding: 0px 30px;
+	margin-bottom: 40px;
+}
+.upload-product__item{
+	padding: 0px 50px;
+	margin-bottom: 20px;
+	display: flex;
+	align-items: center;
+	label{
+		color: #444;
+		display: inline-block;
+		min-width: 175px;
+		padding-right: 15px;
+		sup{
+			color: $green;
+			font-size: 24px;
+			top: 0;
+		}
+	}
+	input{
+		display: inline-block;
+		width: 100%;
+		&[type='text']{
+			border: 1px solid $border;
+			height: 40px;
+			padding-left: 17px;
+			padding-right: 17px;
+			background-color: #f4f5f6;
+			outline: none;
+		}
+	}
+	textarea{
+		display: inline-block;
+		width: 100%;
+		border: 1px solid $border;
+		height: 145px;
+		padding: 10px 17px;
+		background-color: #f4f5f6;
+		outline: none;
+		resize: none;
+	}
+	select{
+		display: inline-block;
+		width: 100%;
+	}
+	
+}
+
+.upload-product__form{
+	.upload-product__title{
+		padding-top: 30px;
+	}
+	.jq-selectbox{
+		width: 100%;
+
+	}
+	.jq-selectbox__select{
+		border-radius: 0;
+		border: 1px solid $border;
+		height: 40px;
+		padding-left: 17px;
+		padding-right: 17px;			
+		background: #f4f5f6;
+		outline: none;
+		box-shadow: none;
+	}
+	.jq-selectbox__trigger-arrow{
+		top: 18px;
+	}
+	.jq-selectbox__trigger{
+		line-height: 40px;
+		border-left: none;
+	}
+	.jq-selectbox__select-text{
+		line-height: 40px;
+	}
+}

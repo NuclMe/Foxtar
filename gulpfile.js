@@ -6,40 +6,32 @@ const concat = require('gulp-concat');
 const rename = require('gulp-rename');
 const autoprefixer = require('gulp-autoprefixer');
 
-// Компиляция SCSS в CSS
+// Compile SCSS into CSS
 function scssTask() {
   return src('app/scss/**/*.scss')
     .pipe(sass.sync({ outputStyle: 'compressed' }).on('error', sass.logError))
-    .pipe(
-      autoprefixer({
-        cascade: false,
-      })
-    )
+    .pipe(autoprefixer({ cascade: false }))
     .pipe(rename({ suffix: '.min' }))
     .pipe(dest('app/css'))
     .pipe(browserSync.stream());
 }
 
-// Перезагрузка браузера при изменении JS
+// Reload Browser on JS changes
 function scriptTask() {
   return src('app/js/**/*.js').pipe(browserSync.stream());
 }
 
-// Перезагрузка браузера при изменении HTML
+// Reload Browser on HTML changes
 function codeTask() {
   return src('app/*.html').pipe(browserSync.stream());
 }
 
-// Запуск локального сервера
-function browserSyncTask() {
-  browserSync.init({
-    server: {
-      baseDir: 'app',
-    },
-  });
+// Copy everything to /docs for GitHub Pages
+function buildTask() {
+  return src('app/**/*').pipe(dest('docs'));
 }
 
-// Сборка и минификация JS библиотек
+// Minify & bundle JS libraries
 function jsTask() {
   return src([
     'node_modules/@fancyapps/fancybox/dist/jquery.fancybox.js',
@@ -53,16 +45,29 @@ function jsTask() {
     .pipe(dest('app/js'));
 }
 
-// Отслеживание изменений
+// Start local dev server
+function browserSyncTask() {
+  browserSync.init({
+    server: {
+      baseDir: 'app',
+    },
+  });
+}
+
+// Watch for changes
 function watchTask() {
   watch('app/scss/**/*.scss', scssTask);
   watch('app/js/**/*.js', scriptTask);
   watch('app/*.html', codeTask);
 }
 
-// Задачи по умолчанию
+// Default task (Build first, then start dev server)
 exports.default = series(
   jsTask,
   scssTask,
+  buildTask,
   parallel(browserSyncTask, watchTask)
 );
+
+// Separate build task for deployment
+exports.build = series(jsTask, scssTask, buildTask);

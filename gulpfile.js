@@ -1,56 +1,68 @@
-var gulp = require('gulp'),
-    scss = require('gulp-sass'),
-    browserSync = require('browser-sync'),
-    uglifyjs = require('gulp-uglifyjs'),
-    concat = require('gulp-concat'),
-    rename = require('gulp-rename'),
-    autoprefixer = require('gulp-autoprefixer');
+const { src, dest, watch, series, parallel } = require('gulp');
+const sass = require('gulp-sass')(require('sass'));
+const browserSync = require('browser-sync').create();
+const uglify = require('gulp-uglify');
+const concat = require('gulp-concat');
+const rename = require('gulp-rename');
+const autoprefixer = require('gulp-autoprefixer');
 
-gulp.task('scss', function(){
-    return gulp.src('app/scss/**/*.scss')
-            .pipe(scss({outputStyle: 'compressed'}))
-            .pipe(autoprefixer({
-                browsers: ['last 8 versions'],
-                }))
-            .pipe(rename({suffix: '.min'}))
-            .pipe(gulp.dest('app/css'))
-            .pipe(browserSync.reload({stream: true}))
-});
+// Компиляция SCSS в CSS
+function scssTask() {
+  return src('app/scss/**/*.scss')
+    .pipe(sass.sync({ outputStyle: 'compressed' }).on('error', sass.logError))
+    .pipe(
+      autoprefixer({
+        cascade: false,
+      })
+    )
+    .pipe(rename({ suffix: '.min' }))
+    .pipe(dest('app/css'))
+    .pipe(browserSync.stream());
+}
 
-gulp.task('script', function(){
-    return gulp.src('app/js/**/*.js')
-            .pipe(browserSync.reload({stream: true}))
-});
+// Перезагрузка браузера при изменении JS
+function scriptTask() {
+  return src('app/js/**/*.js').pipe(browserSync.stream());
+}
 
-gulp.task('code', function(){
-    return gulp.src('app/*.html')
-            .pipe(browserSync.reload({stream: true}))
-});
+// Перезагрузка браузера при изменении HTML
+function codeTask() {
+  return src('app/*.html').pipe(browserSync.stream());
+}
 
-gulp.task('browser-sync', function(){
-    browserSync.init({
-        server : {
-            baseDir: "app"
-        }
-    })
-});
+// Запуск локального сервера
+function browserSyncTask() {
+  browserSync.init({
+    server: {
+      baseDir: 'app',
+    },
+  });
+}
 
-gulp.task('js', function(){
-    return gulp.src(
-        ['node_modules/@fancyapps/fancybox/dist/jquery.fancybox.js', 
-            'node_modules/slick-carousel/slick/slick.js',
-          'node_modules/mixitup/dist/mixitup.js',
-        'node_modules/ion-rangeslider/js/ion.rangeSlider.js',
-    'node_modules/jquery-form-styler/dist/jquery.formstyler.js'])
-        .pipe(concat('libs.min.js'))
-        .pipe(uglifyjs())
-        .pipe(gulp.dest('app/js'))
-});
+// Сборка и минификация JS библиотек
+function jsTask() {
+  return src([
+    'node_modules/@fancyapps/fancybox/dist/jquery.fancybox.js',
+    'node_modules/slick-carousel/slick/slick.js',
+    'node_modules/mixitup/dist/mixitup.js',
+    'node_modules/ion-rangeslider/js/ion.rangeSlider.js',
+    'node_modules/jquery-form-styler/dist/jquery.formstyler.js',
+  ])
+    .pipe(concat('libs.min.js'))
+    .pipe(uglify())
+    .pipe(dest('app/js'));
+}
 
-gulp.task('watch', function(){
-    gulp.watch('app/scss/**/*.scss', gulp.parallel('scss'))
-    gulp.watch('app/js/**/*.js', gulp.parallel('script'))
-    gulp.watch('app/*.html', gulp.parallel('code'))
-});
+// Отслеживание изменений
+function watchTask() {
+  watch('app/scss/**/*.scss', scssTask);
+  watch('app/js/**/*.js', scriptTask);
+  watch('app/*.html', codeTask);
+}
 
-gulp.task('default', gulp.parallel('js' ,'scss', 'browser-sync', 'watch'));
+// Задачи по умолчанию
+exports.default = series(
+  jsTask,
+  scssTask,
+  parallel(browserSyncTask, watchTask)
+);
